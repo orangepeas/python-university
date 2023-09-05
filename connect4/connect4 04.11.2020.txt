@@ -1,0 +1,153 @@
+#plot gameboard
+#loop over even and odd numbers to check player turns
+#ask for an input for where you want the token
+#check if the input is a legal move
+#plot the arrayboard on the gameboard
+#check if there is 4 in a row after the input, and then if the board is full, if not next player turn
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+def playerturn(i):
+    arrayboard=np.zeros([6,7])
+    wincondition=4                       #need to make this an input for the user to choose how many to connect 2
+    gamewon=False                         #also have them choose board size
+    while gamewon==False:
+        if i%2==0:            #if the number is even
+            playerone=True
+            playermove=move(playerone,arrayboard,wincondition)   #asks the player to input move
+            arrayboard=plotmove(playermove,playerone,arrayboard)
+            gamewon=gamewin(arrayboard,wincondition)
+            print("gamewon is","",gamewon)
+            i=i+1
+        else:
+            playerone=False
+            playermove=move(playerone,arrayboard,wincondition)   #asks the player to input move
+            arrayboard=plotmove(playermove,playerone,arrayboard)
+            gamewon=gamewin(arrayboard,wincondition)
+            print("gamewon is","",gamewon)
+            i=i+1
+    if gamewon ==True:
+        print("waheywewoon")
+            
+            
+def plotmove(move,playerone,arrayboard):
+    if playerone==True:
+        print(move)
+        arrayboard[move[0],move[1]]=1
+        print(arrayboard)
+        return(arrayboard)
+    else:
+        arrayboard[move[0],move[1]]=2
+        print(arrayboard)
+        return(arrayboard)
+
+        
+
+def plotgameboard():
+    for i in range(6):
+        x=np.arange(1,8)
+        y=np.full(7,[i+1])
+        board=plt.scatter(x,y,c='white',s=200,edgecolors='black')
+        
+        
+def move(playeroneturn,arrayboard,wincondition):
+    failstate=False
+    if playeroneturn == True: #checks to see which players turn it is
+        p=("Player One, ")
+    else:
+        p=("Player Two, ")
+    while True: #takes the input and checks if its legal, and then passes to the plot function
+        print()        
+        print(p)
+        print()
+        try:
+            move=eval(input("Please enter the co-ordinates of where you would like your token: "))
+        except:
+            print("Please enter a legal move.")
+            continue
+        (correctmove,failstate)=check(move,arrayboard,wincondition) 
+        if failstate==True:
+            continue
+        else:
+            return(correctmove)
+
+
+            
+def check(move,arrayboard,wincondition): #checks if the input is within the bounds of the board, if its a tuple, if its a legal connect 4 move etc.
+    if type(move)==tuple and len(move)==2 and move[0]<=(arrayboard.shape[1]) and move[1]<=(arrayboard.shape[0]):
+        move=(np.array(move)-1)                         #minuses 1 because computer starts at 0
+        move[[0,1]]=move[[1,0]]            #swaps variables so that coordinates are x,y instead of y,x
+        for i in range(arrayboard.shape[0]):           #switches to the coordinate system that i want
+            if move[0]==i:                             #loops to see what the move is and mirrors in x axis 
+                move[0]=(arrayboard.shape[0]-i)-1
+                break
+            else:
+                continue
+        x=arrayboard[(move[0]),move[1]]           #it doesnt like if this is the if comparison without the variable
+        if x!=0:                                #checks if there is a token where the move is
+            print("Please move where there is no token.")
+            failstate=True                
+            return(move,failstate)
+        
+        if move[0]<0 or move[1]<0:                                #checks if there is a token where the move is
+            print("Please enter a legal move.")
+            failstate=True                
+            return(move,failstate)
+        
+        failstate=False
+        return(move,failstate)
+        
+    else:
+        print("Please enter a legal move.")
+        failstate=True              
+        return(move,failstate)
+ 
+
+def gamewin(arrayboard,wincondition):
+    x=0         #x is rows, y is columns, xy is diagonals
+    y=0
+    xy=0
+    ysize=(arrayboard.shape[0]-1)       #it only needs to check 5 times because it checks the on in front
+    xsize=(arrayboard.shape[1]-1)       #it only needs to check 6 times because it checks the on in front
+    for i in range(xsize-1):                             #checks rows
+        if arrayboard[i][0]==arrayboard[i+1][0] and (arrayboard[i][0]==1 or arrayboard[i][0]==2):
+            x=x+1
+        if x==wincondition:
+            gamewon=True
+            return(gamewon)
+    for i in range(ysize-1):                             #checks columns
+        if arrayboard[0][i]==arrayboard[0][i+1] and (arrayboard[i][0]==1 or arrayboard[i][0]==2):
+            y=y+1
+        if y==wincondition:
+            gamewon=True
+            return(gamewon)
+    for i in range(ysize-1):                             #checks diagonals
+        if arrayboard[i][i]==arrayboard[i+1][i+1] and (arrayboard[i][0]==1 or arrayboard[i][0]==2):
+            y=y+1
+        if y==wincondition:
+            gamewon=True
+            return(gamewon)
+    gamewon=False
+    return(gamewon)
+    
+    
+def plottedmove(move,arrayboard):          
+    move=(np.array(move)-1)              #minuses 1 because computer starts at 0
+    for i in range(arrayboard.shape[0]):           #switches to the coordinate system that i want
+        if move[0]==i:                             #loops to see what the move is and mirrors in x axis 
+            move[0]=(arrayboard.shape[0]-i)-1
+            break
+        else:
+            continue
+    return(move)
+            
+
+plotgameboard()
+i=0
+playerturn(i)
+
+#arrayboard=np.zeros([6,7]) 
+#move=[1,1]
+#playerone=True
+#plotmove(move,playerone,arrayboard)
